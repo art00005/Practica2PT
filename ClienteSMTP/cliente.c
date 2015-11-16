@@ -21,7 +21,7 @@ Autor: Juan Carlos Cuevas Martínez
 #include "protocol.h"
 
 
-
+//prueba modificacion
 
 
 int main(int *argc, char *argv[])
@@ -84,59 +84,68 @@ int main(int *argc, char *argv[])
 			{
 				printf("CLIENTE> CONEXION ESTABLECIDA CON %s:%d\r\n",ipdest,TCP_SERVICE_PORT);
 			
+
+
+
+
+
+
+
+
 		
 				//Inicio de la máquina de estados
 				do{
 					switch(estado)
 					{
-					case S_HELO:
+					case S_INI:
 						// Se recibe el mensaje de bienvenida
+					case S_HELO:
+						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",EHLO,CRLF);
+						break;	
+					case S_MAIL:
 						break;
-					case S_USER:
-						// establece la conexion de aplicacion 
-						printf("CLIENTE> Introduzca el usuario (enter para salir): ");
-						gets(input);
-						if(strlen(input)==0)
-						{
-							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",SD,CRLF);
-							estado=S_QUIT;
-						}
-						else
-
-						sprintf_s (buffer_out, sizeof(buffer_out), "%s %s%s",SC,input,CRLF);
-						break;
-					case S_PASS:
-						printf("CLIENTE> Introduzca la clave (enter para salir): ");
-						gets(input);
-						if(strlen(input)==0)
-						{
-							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",SD,CRLF);
-							estado=S_QUIT;
-						}
-						else
-							sprintf_s (buffer_out, sizeof(buffer_out), "%s %s%s",PW,input,CRLF);
+					case S_RCPT:
 						break;
 					case S_DATA:
-						printf("CLIENTE> Introduzca datos (enter o QUIT para salir): ");
-						gets(input);
-						if(strlen(input)==0)
-						{
-							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",SD,CRLF);
-							estado=S_QUIT;
-						}
-						else
-							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",input,CRLF);
 						break;
-				 
-				
+					case S_CAB:
+						break;
+					case S_SALIR:
+						break;
 					}
-					//Envio
-					if(estado!=S_HELO)
-					// Ejercicio: Comprobar el estado de envio
-						enviados=send(sockfd,buffer_out,(int)strlen(buffer_out),0);
 
-					//Recibo
-					recibidos=recv(sockfd,buffer_in,512,0);
+
+
+
+
+
+
+
+					if (estado != S_INI){
+						// Ejercicio: Comprobar el estado de envio
+						enviados = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);						//envio datagramas
+
+						if (enviados == SOCKET_ERROR){
+							printf("Error en el envio");
+							estado = S_QUIT;
+						}
+						if (enviados > 0){
+							printf("Se han enviado %d bytes \r\n ", enviados);
+
+						}
+						if (enviados == 0){
+							printf("Conexion ha sido liberada de forma acordada");
+							estado = S_QUIT;
+						}
+					}
+
+
+
+
+
+
+
+
 
 					if(recibidos<=0)
 					{
