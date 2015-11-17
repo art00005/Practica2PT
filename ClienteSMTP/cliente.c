@@ -149,7 +149,7 @@ int main(int *argc, char *argv[])
 									else (buffer_out, sizeof(buffer_out), "%s%s%i%s%s",buffer_time,SP,zone,SP,CRLF);
 									variableDatos=enviarData(buffer_out,sockfd);
 									printf("%i",variableDatos);
-									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 6;}
+									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
 									break;
 								case 2:
 									break;
