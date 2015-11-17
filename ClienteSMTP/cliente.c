@@ -184,7 +184,19 @@ int main(int *argc, char *argv[])
 										}
 									}
 									break;
-								case 5:
+								case 5:	
+									printf("Introduce el texto: ");
+									punto = 1;
+									estado2++;
+									while (punto != 0){
+										gets(input);
+										punto=strcmp(input,".");
+										if (punto !=0) { 
+											sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s",input,SP,CRLF);
+											variableDatos=enviarData(buffer_out,sockfd);
+											if (variableDatos <= 0) estado = S_QUIT;				
+										}else sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s",CRLF,input,CRLF);
+									}
 									break;
 								case 6:
 									break;
