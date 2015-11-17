@@ -28,11 +28,12 @@ int main(int *argc, char *argv[])
 {
 	SOCKET sockfd;
 	struct sockaddr_in server_in;
-	char buffer_in[1024], buffer_out[1024],input[1024];
-	int recibidos=0,enviados=0,envioVariosRCPT=0;
-	int estado=S_HELO;
+	char buffer_in[1024], buffer_out[1024],input[1024],buffer_time[80];
+	int recibidos=0,enviados=0,variableDatos=0,punto=1,envioVariosRCPT=0,zone=0;
+	int estado=S_HELO , estado2=0;
 	char option, guion[]=COMP;
-
+	struct tm* timeinfo;
+	time_t rawtime;
 	WORD wVersionRequested;
 	WSADATA wsaData;
 	int err;
@@ -134,7 +135,38 @@ int main(int *argc, char *argv[])
 						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s",DATA,SP,CRLF);	
 						break;
 					case S_CAB:
+						estado2=1;
+						do{
+							variableDatos=0;
+							switch(estado2){
+								case 1:
+									estado2++;
+									zone = getTimeZone();
+									time( &rawtime );
+									timeinfo = localtime( &rawtime );
+									strftime(buffer_time, 80,"Date: %a, %d %b %Y %X ", timeinfo);			
+									if (zone > 0) sprintf_s (buffer_out, sizeof(buffer_out), "%s%s+%i%s%s",buffer_time,SP,zone,SP,CRLF);
+									else (buffer_out, sizeof(buffer_out), "%s%s%i%s%s",buffer_time,SP,zone,SP,CRLF);
+									variableDatos=enviarData(buffer_out,sockfd);
+									printf("%i",variableDatos);
+									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 6;}
+									break;
+								case 2:
+									break;
+								case 3:
+									break;
+								case 4:
+									break;
+								case 5:
+									break;
+								case 6:
+									break;
+							}
+						}while (estado2 != 7);
+
 						break;
+
+
 					case S_SALIR:
 						break;
 					}
@@ -230,5 +262,43 @@ int main(int *argc, char *argv[])
 	
 	
 	return(0);
+
+}
+
+
+
+
+
+
+
+int enviarData(char buffer_out[1024], SOCKET sockfd)
+{
+	int enviados=0;
+	enviados = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);					
+	if (enviados == SOCKET_ERROR || enviados == 0){
+		printf("Ha habido un error");
+	}
+	return enviados;
+}
+
+
+int getTimeZone()
+{
+   TIME_ZONE_INFORMATION tziOld;
+	DWORD dwRet;
+
+	dwRet = GetTimeZoneInformation(&tziOld);
+
+	 if(dwRet == TIME_ZONE_ID_STANDARD || dwRet == TIME_ZONE_ID_UNKNOWN)    
+      tziOld.StandardBias/60;
+   else if( dwRet == TIME_ZONE_ID_DAYLIGHT )
+      return tziOld.DaylightBias/60;
+   else
+   {
+      printf("GTZI failed (%d)\n", GetLastError());
+      return 0;
+   }
+
+  
 
 }
