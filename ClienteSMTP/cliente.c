@@ -211,6 +211,8 @@ int main(int *argc, char *argv[])
 
 
 					case S_SALIR:
+						printf("Finaliza la sesion");
+						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s",QUIT,SP,CRLF);
 						break;
 					}
 
