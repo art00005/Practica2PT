@@ -29,7 +29,7 @@ int main(int *argc, char *argv[])
 	SOCKET sockfd;
 	struct sockaddr_in server_in;
 	char buffer_in[1024], buffer_out[1024],input[1024];
-	int recibidos=0,enviados=0;
+	int recibidos=0,enviados=0,envioVariosRCPT=0;
 	int estado=S_HELO;
 	char option, guion[]=COMP;
 
@@ -115,6 +115,20 @@ int main(int *argc, char *argv[])
 						
 						break;
 					case S_RCPT:
+						envioVariosRCPT=0;
+						printf("CLIENTE> Introduzca el destinatario (enter para salir): ");
+						gets(input);
+						if(strlen(input)==0)												
+						{
+							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",SD,CRLF);
+							estado=S_QUIT;
+						}
+						else{
+							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s:%s%s",RCPT,SP,TO,input,CRLF);
+							printf("¿Desea añadir otro destinatario?: S/N %s",CRLF);
+							gets(input);
+							if(strcmp(input,"S") == 0 || strcmp(input,"s") == 0 || strcmp(input,"Si") == 0 || strcmp(input,"si") == 0) envioVariosRCPT = 1;
+						}
 						break;
 					case S_DATA:
 						break;
@@ -189,7 +203,7 @@ int main(int *argc, char *argv[])
 						//------------------------------------------------------------------Fin modificacion
 						if (estado != S_QUIT && ((strncmp(buffer_in, "2", 1) == 0) || (strncmp(buffer_in, "3", 1) == 0))){                                                                     // ||||||||||||||||||||||||||||||||||||||||||||MODIFICACION PARA RECIBIDOS 2XX
 								estado++;  
-								
+								if (estado != S_RCPT && envioVariosRCPT == 1) estado--;
 
 						}else{
 							estado = S_QUIT;
