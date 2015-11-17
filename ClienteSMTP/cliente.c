@@ -31,7 +31,7 @@ int main(int *argc, char *argv[])
 	char buffer_in[1024], buffer_out[1024],input[1024];
 	int recibidos=0,enviados=0;
 	int estado=S_HELO;
-	char option;
+	char option, guion[]=COMP;
 
 	WORD wVersionRequested;
 	WSADATA wsaData;
@@ -77,7 +77,7 @@ int main(int *argc, char *argv[])
 			server_in.sin_port=htons(TCP_SERVICE_PORT);
 			server_in.sin_addr.s_addr=inet_addr(ipdest);
 			
-			estado=S_HELO;
+			estado=S_INI;
 		
 			// establece la conexion de transporte
 			if(connect(sockfd,(struct sockaddr*)&server_in,sizeof(server_in))==0)
@@ -103,6 +103,16 @@ int main(int *argc, char *argv[])
 						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",EHLO,CRLF);
 						break;	
 					case S_MAIL:
+						// establece la conexion de aplicacion 
+						printf("CLIENTE> Introduzca el Remitente (enter para salir): ");
+						gets(input);
+						if(strlen(input)==0)												
+						{
+							sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",SD,CRLF);
+							estado=S_QUIT;
+						}
+						else sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s:%s%s",MAIL,SP,FROM,input,CRLF);
+						
 						break;
 					case S_RCPT:
 						break;
@@ -147,29 +157,43 @@ int main(int *argc, char *argv[])
 
 
 
-					if(recibidos<=0)
-					{
-						DWORD error=GetLastError();
-						if(recibidos<0)
-						{
-							printf("CLIENTE> Error %d en la recepción de datos\r\n",error);
-							estado=S_QUIT;
-						}
-						else
-						{
-							printf("CLIENTE> Conexión con el servidor cerrada\r\n");
-							estado=S_QUIT;
+					//Recibo
+					do{
 						
-					
-						}
-					}else
-					{
-						buffer_in[recibidos]=0x00;
-						printf(buffer_in);
-						if(estado!=S_DATA && strncmp(buffer_in,OK,2)==0) 
-							estado++;  
-					}
+						recibidos=recv(sockfd,buffer_in,512,0);
 
+						if(recibidos<=0)																	//si datos recividos por el sever menores o iguales a 0 error en recepcion
+						{
+							DWORD error=GetLastError();
+							if(recibidos<0)
+							{
+								printf("CLIENTE> Error %d en la recepción de datos\r\n",error);
+								estado=S_QUIT;
+							}
+							else
+							{
+								printf("CLIENTE> Conexión con el servidor cerrada\r\n");
+								estado=S_QUIT;
+							}
+						}else{
+												
+																//Modificacion para en caso de estar en modo datos muestre por pantalla el resultado |||||||||||||||||||||||||||||||||||||||||||||||||QUITADO EL if
+								buffer_in[recibidos] = 0x00;
+								printf(buffer_in);
+						}
+						
+					}while (buffer_in[3] == guion[0] );
+						
+
+
+						//------------------------------------------------------------------Fin modificacion
+						if (estado != S_QUIT && ((strncmp(buffer_in, "2", 1) == 0) || (strncmp(buffer_in, "3", 1) == 0))){                                                                     // ||||||||||||||||||||||||||||||||||||||||||||MODIFICACION PARA RECIBIDOS 2XX
+								estado++;  
+								
+
+						}else{
+							estado = S_QUIT;
+						}
 				}while(estado!=S_QUIT);
 				
 	
