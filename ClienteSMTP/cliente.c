@@ -199,6 +199,10 @@ int main(int *argc, char *argv[])
 									}
 									break;
 								case 6:
+									estado2++;
+									printf("Desea enviar otro correo: S/N %s", CRLF);
+									gets(input);
+									if(strcmp(input,"S") == 0 || strcmp(input,"s") == 0 || strcmp(input,"Si") == 0 || strcmp(input,"si") == 0) estado = S_MAIL;
 									break;
 							}
 						}while (estado2 != 7);
