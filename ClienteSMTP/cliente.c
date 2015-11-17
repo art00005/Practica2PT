@@ -10,6 +10,9 @@ Fecha: 23/09/2012
 Descripción:
 	Cliente de eco sencillo TCP.
 
+	Modificado por: Jesús Bermejo Torrent
+					Andres Del Rio Tassara
+
 Autor: Juan Carlos Cuevas Martínez
 
 *******************************************************/
@@ -21,13 +24,15 @@ Autor: Juan Carlos Cuevas Martínez
 #include "protocol.h"
 
 
-//prueba modificacion
+
 
 
 int main(int *argc, char *argv[])
 {
 	SOCKET sockfd;
 	struct sockaddr_in server_in;
+	struct in_addr address;
+	struct hostent *host;
 	char buffer_in[1024], buffer_out[1024],input[1024],buffer_time[80];
 	int recibidos=0,enviados=0,variableDatos=0,punto=1,envioVariosRCPT=0,zone=0;
 	int estado=S_HELO , estado2=0;
@@ -43,7 +48,7 @@ int main(int *argc, char *argv[])
 	
 	//Inicialización Windows sockets
 	wVersionRequested=MAKEWORD(1,1);
-	err=WSAStartup(wVersionRequested,&wsaData);
+	err=WSAStartup(wVersionRequested,&wsaData);         
 	if(err!=0)
 		return(0);
 
@@ -55,14 +60,14 @@ int main(int *argc, char *argv[])
 	//Fin: Inicialización Windows sockets
 
 	do{
-		sockfd=socket(AF_INET,SOCK_STREAM,0);
+		sockfd=socket(AF_INET,SOCK_STREAM,0);						//primitiva
 
-		if(sockfd==INVALID_SOCKET)
+		if(sockfd==INVALID_SOCKET)									//si error creacion socjket
 		{
 			printf("CLIENTE> ERROR AL CREAR SOCKET\r\n");
 			exit(-1);
 		}
-		else
+		else															//creacion socket correct
 		{
 			printf("CLIENTE> SOCKET CREADO CORRECTAMENTE\r\n");
 
@@ -70,32 +75,41 @@ int main(int *argc, char *argv[])
 			printf("CLIENTE> Introduzca la IP destino (pulsar enter para IP por defecto): ");
 			gets(ipdest);
 
-			if(strcmp(ipdest,"")==0)
-				strcpy(ipdest,default_ip);
+			if (strcmp(ipdest, "") == 0)									//si ip introducida es nada asigna la ip default
+				strcpy(ipdest, default_ip);
 
-
-			server_in.sin_family=AF_INET;
-			server_in.sin_port=htons(TCP_SERVICE_PORT);
-			server_in.sin_addr.s_addr=inet_addr(ipdest);
+			 if (inet_addr(ipdest) == INADDR_NONE){
+				 server_in.sin_family = AF_INET;
+				 server_in.sin_port = htons(TCP_SERVICE_PORT);
+				 server_in.sin_addr.s_addr = inet_addr(ipdest);
+				//La dirección introducida por teclado no es correcta o
+				//corresponde con un dominio.				
+				host = gethostbyname(ipdest);
+				if (host != NULL){
+						memcpy(&address, host->h_addr_list[0], 4);
+						printf("\nDireccion %s\n", inet_ntoa(address));
+						server_in.sin_addr.S_un.S_addr = address.S_un.S_addr;
+						strcpy(ipdest, host->h_addr_list[0]);
+					
+				}
+			 }
+			 else{
+				 server_in.sin_family = AF_INET;
+				 server_in.sin_port = htons(TCP_SERVICE_PORT);
+				 server_in.sin_addr.s_addr = inet_addr(ipdest);
+			 }
 			
-			estado=S_INI;
+			estado=S_INI;												//estado 0
 		
 			// establece la conexion de transporte
-			if(connect(sockfd,(struct sockaddr*)&server_in,sizeof(server_in))==0)
+			if(connect(sockfd,(struct sockaddr*)&server_in,sizeof(server_in))==0)					//primitiva connect si exito...
 			{
 				printf("CLIENTE> CONEXION ESTABLECIDA CON %s:%d\r\n",ipdest,TCP_SERVICE_PORT);
 			
-
-
-
-
-
-
-
-
 		
 				//Inicio de la máquina de estados
 				do{
+					
 					switch(estado)
 					{
 					case S_INI:
@@ -103,7 +117,7 @@ int main(int *argc, char *argv[])
 					case S_HELO:
 						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s",EHLO,CRLF);
 						break;	
-					case S_MAIL:
+					case S_MAIL:														   
 						// establece la conexion de aplicacion 
 						printf("CLIENTE> Introduzca el Remitente (enter para salir): ");
 						gets(input);
@@ -115,7 +129,7 @@ int main(int *argc, char *argv[])
 						else sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s:%s%s",MAIL,SP,FROM,input,CRLF);
 						
 						break;
-					case S_RCPT:
+					case S_RCPT:		
 						envioVariosRCPT=0;
 						printf("CLIENTE> Introduzca el destinatario (enter para salir): ");
 						gets(input);
@@ -209,20 +223,15 @@ int main(int *argc, char *argv[])
 
 						break;
 
-
 					case S_SALIR:
 						printf("Finaliza la sesion");
 						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s",QUIT,SP,CRLF);
 						break;
 					}
 
+					
 
-
-
-
-
-
-
+					//Envio
 					if (estado != S_INI){
 						// Ejercicio: Comprobar el estado de envio
 						enviados = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);						//envio datagramas
@@ -243,9 +252,7 @@ int main(int *argc, char *argv[])
 
 
 
-
-
-
+				
 
 
 
@@ -286,10 +293,10 @@ int main(int *argc, char *argv[])
 						}else{
 							estado = S_QUIT;
 						}
+					
 				}while(estado!=S_QUIT);
 				
-	
-		
+				
 			}
 			else
 			{
@@ -309,8 +316,6 @@ int main(int *argc, char *argv[])
 	return(0);
 
 }
-
-
 
 
 
