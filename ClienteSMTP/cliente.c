@@ -168,6 +168,21 @@ int main(int *argc, char *argv[])
 									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
 									break;
 								case 4:
+									estado2++;
+									printf("Destinatario: ");
+									gets(input);
+									sprintf_s (buffer_out, sizeof(buffer_out), "To: <%s>%s%s%s",input,SP,CRLF);
+									variableDatos=enviarData(buffer_out,sockfd);
+									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
+									else{
+										printf("¿Desea añadir otro destinatario?: S/N %s",CRLF);
+										gets(input);
+										if(strcmp(input,"S") == 0 || strcmp(input,"s") == 0 || strcmp(input,"Si") == 0 || strcmp(input,"si") == 0) estado2--;
+										else { sprintf_s (buffer_out, sizeof(buffer_out),"%s%s",CRLF,CRLF);
+										variableDatos=enviarData(buffer_out,sockfd);
+										if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
+										}
+									}
 									break;
 								case 5:
 									break;

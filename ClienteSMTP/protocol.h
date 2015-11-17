@@ -33,10 +33,12 @@
 // NOMBRE Y PASSWORD AUTORIZADOS
 #define USER		"alumno"
 #define PASSWORD	"123456"
+
 //ENVIO
 #define SP			" "
 #define	ECHO		"echo"
 #define OK			"OK"
+
 //VARIABLES SMTP
 #define MAIL			"MAIL"
 #define FROM			"FROM"
