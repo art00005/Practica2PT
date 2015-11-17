@@ -33,3 +33,18 @@
 // NOMBRE Y PASSWORD AUTORIZADOS
 #define USER		"alumno"
 #define PASSWORD	"123456"
+//ENVIO
+#define SP			" "
+#define	ECHO		"echo"
+#define OK			"OK"
+//VARIABLES SMTP
+#define MAIL			"MAIL"
+#define FROM			"FROM"
+#define RCPT			"RCPT"
+#define TO				"TO"
+#define DATA			"DATA"
+#define EHLO			"EHLO"
+#define QUIT			"QUIT"
+
+//COMPARACION
+#define COMP			"-"
