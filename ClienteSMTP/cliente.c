@@ -152,8 +152,20 @@ int main(int *argc, char *argv[])
 									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
 									break;
 								case 2:
+									estado2++;
+									printf("Remitente: ");
+									gets(input);
+									sprintf_s (buffer_out, sizeof(buffer_out), "From: <%s>%s%s",input,SP,CRLF);
+									variableDatos=enviarData(buffer_out,sockfd);
+									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
 									break;
 								case 3:
+									estado2++;
+									printf("Asunto: ");
+									gets(input);
+									sprintf_s (buffer_out, sizeof(buffer_out), "Subject: %s%s%s",input,SP,CRLF);
+									variableDatos=enviarData(buffer_out,sockfd);
+									if (variableDatos <= 0) {estado = S_QUIT; estado2 = 7;}
 									break;
 								case 4:
 									break;
