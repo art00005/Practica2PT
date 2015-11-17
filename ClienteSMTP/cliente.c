@@ -130,7 +130,8 @@ int main(int *argc, char *argv[])
 							if(strcmp(input,"S") == 0 || strcmp(input,"s") == 0 || strcmp(input,"Si") == 0 || strcmp(input,"si") == 0) envioVariosRCPT = 1;
 						}
 						break;
-					case S_DATA:
+					case S_DATA:																
+						sprintf_s (buffer_out, sizeof(buffer_out), "%s%s%s",DATA,SP,CRLF);	
 						break;
 					case S_CAB:
 						break;
